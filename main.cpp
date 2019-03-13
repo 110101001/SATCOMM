@@ -19,5 +19,6 @@ int main(){
     class graphMatrix *graph= getMatrix("0400.snp");
     int ctrls[]={8,20,32,44};
     graph->importControler(ctrls,4);
+    graph->caculate();
     return 0;
 }
