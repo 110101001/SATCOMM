@@ -27,6 +27,18 @@ class graphMatrix *getMatrix(const char* snapName){
     float delay;
     float delayMatrix[NODE_COUNT][NODE_COUNT];
     float relMatrix[NODE_COUNT][NODE_COUNT];
+    float traffic[NODE_COUNT];
+    int gates[GATE_COUNT];
+    for(int i=0;i<GATE_COUNT;i++){
+        gates[i]=i;
+    }
+
+    for(int i=0;i<GATE_COUNT;i++){
+        traffic[i]=0;
+    }
+    for(int i=GATE_COUNT;i<NODE_COUNT;i++){
+        traffic[i]=1.0/SATELLITE_COUNT;
+    }
 
     for(int i=0;i<GATE_COUNT;i++){
         for(int j=GATE_COUNT;j<NODE_COUNT;j++){
@@ -74,6 +86,7 @@ class graphMatrix *getMatrix(const char* snapName){
            delayMatrix[i][j]+=delayMatrix[j][i]; 
         }
     }
+
 /*
     for(int i=0;i<NODE_COUNT;i++){//display matrix
         for(int j=0;j<NODE_COUNT;j++){
@@ -82,5 +95,5 @@ class graphMatrix *getMatrix(const char* snapName){
         cout<<endl;
     }
 */
-    return new class graphMatrix();
+    return new class graphMatrix(delayMatrix,relMatrix,traffic,gates);
 }

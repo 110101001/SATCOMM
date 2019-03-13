@@ -16,6 +16,8 @@
 #include"graphMatrix.h"
 
 int main(){
-    getMatrix("0400.snp");
+    class graphMatrix *graph= getMatrix("0400.snp");
+    int ctrls[]={8,20,32,44};
+    graph->importControler(ctrls,4);
     return 0;
 }
