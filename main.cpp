@@ -14,11 +14,42 @@
 #include<iostream>
 #include"include/generateMatrix.h"
 #include"graphMatrix.h"
+#include"simulateAnneal.h"
 
-int main(){
-    class graphMatrix *graph= getMatrix("0400.snp");
-    int ctrls[]={8,21,34,47,60};
-    graph->importControler(ctrls,5);
-    graph->caculate();
+using namespace std;
+
+class graphMatrix *graph;
+
+int main(int argc,char **argv){
+    if(argc<5) return 1;
+
+    float initTemp;
+    float endTemp;
+    float k;
+    int ctrlerCount;
+    float *delays;
+    delays=(float *)malloc(sizeof(float)*(argc-5));
+    sscanf(argv[1],"%f",&initTemp);
+    sscanf(argv[2],"%f",&endTemp);
+    sscanf(argv[3],"%f",&k);
+    sscanf(argv[4],"%d",&ctrlerCount);
+    for(int s=5;s<argc;s++){
+        cout<<"Caculating "<<argv[s]<<":";
+        graph = getMatrix(argv[s]);
+        int *res=anneal(initTemp,endTemp,k,ctrlerCount);
+        /*cout<<"Best placement: ";
+        for(int i=0;i<ctrlerCount;i++){
+            cout<<res[i]<<" ";
+        }
+        cout<<endl;*/
+        graph->importControler(res,ctrlerCount);
+        result score=graph->caculate();
+        delays[s-5]=score.avgDelay;
+    }
+    for(int i=0;i<argc-5;i++){
+        cout<<delays[i]<<" ";
+    }
+    cout<<endl;
     return 0;
+
 }

@@ -30,7 +30,6 @@ graphMatrix::graphMatrix(float edgeDelay[][NODE_COUNT],float edgeRel[][NODE_COUN
         _gate[i]=gate[i];
     }
     for(int i=0;i<NODE_COUNT;i++){
-        ninfo[i].flowSum=nodeTraffic[i];
         ninfo[i].flowLoss=0;
     }
      
@@ -80,7 +79,7 @@ void graphMatrix::importControler(int controlers[],int controlerCount){
             for(int j=0;j<controlerCount;j++){
                 if(nearest==controlers[j]){
                     ninfo[i].controler=nearest;
-                    ninfo[i].controlerDelay=minDistance;
+                    ninfo[i].controlerDelay=minDistance*2;
                     ctrlFlag=true;
                     break;
                 }
@@ -98,7 +97,7 @@ void graphMatrix::importControler(int controlers[],int controlerCount){
             rel*=_edgeRel[present][prev[present]];
             present=prev[present];
         }
-        ninfo[i].controlerRel=rel;
+        ninfo[i].controlerRel=rel*rel;
     }
     /*for(int i=0;i<NODE_COUNT;i++){
         cout<<"index:"<<i<<" ctrler:"<<ninfo[i].controler<<" delay:"<<ninfo[i].controlerDelay<<" rel:"<<ninfo[i].controlerRel<<endl;
@@ -152,13 +151,20 @@ result graphMatrix::caculate(){
             order[index++]=nearest;
         }
 
+        for(int j=0;j<NODE_COUNT;j++){
+            float flowPass=ninfo[j].flowSum*ninfo[j].controlerRel;
+            res.avgDelay+=flowPass*ninfo[j].controlerDelay;
+            res.flowLoss+=ninfo[j].flowSum-flowPass;
+            ninfo[j].flowSum=flowPass;
+        }
+
         for(int j=NODE_COUNT-1;j>0;j--){
             int k=order[j];
             float flowPass=ninfo[k].flowSum*_edgeRel[k][prev[k]];
             //cout<<k<<" to "<<prev[k]<<":"<<flowPass<<endl;
             if(ninfo[k].controler!=ninfo[prev[k]].controler){
                 flowPass*=ninfo[prev[k]].controlerRel;
-                res.avgDelay+=flowPass*ninfo[prev[k]].controlerDelay*2;
+                res.avgDelay+=flowPass*ninfo[prev[k]].controlerDelay;
                 //cout<<"switch ctrler, add "<<flowPass<<"*"<<ninfo[prev[k]].controlerDelay*2<<endl;
             }
             res.avgDelay+=flowPass*_edgeDelay[k][prev[k]]; 
@@ -168,6 +174,6 @@ result graphMatrix::caculate(){
         }
     }
     res.avgDelay/=1-res.flowLoss;
-    cout<<res.avgDelay<<" "<<res.flowLoss<<endl;
+    //cout<<res.avgDelay<<" "<<res.flowLoss<<endl;
     return res;
 }
