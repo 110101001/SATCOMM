@@ -4,7 +4,7 @@
 #
 # Create Time : 2019-03-12 19:57
 #
-# Last modified: 2019-03-13 20:53
+# Last modified: 2019-03-14 12:43
 #
 # Filename:	graph.cpp
 #
@@ -37,7 +37,7 @@ graphMatrix::graphMatrix(float edgeDelay[][NODE_COUNT],float edgeRel[][NODE_COUN
 }
 //First task is to assign a controler to every node(minimum delay), and caculate delay and reliability between controler and node accordingly. Then controlers[] is no longer needed.
 void graphMatrix::importControler(int controlers[],int controlerCount){
-    for(int i=GATE_COUNT;i<NODE_COUNT;i++){
+    for(int i=0;i<NODE_COUNT;i++){
         bool selfControler=false;
         for(int j=0;j<controlerCount;j++){
             if(i==controlers[j]){
@@ -113,7 +113,7 @@ result graphMatrix::caculate(){
         float dis[NODE_COUNT];
         int prev[NODE_COUNT];
         int order[NODE_COUNT];
-        int index=0;
+        int index=1;
         for(int j=0;j<NODE_COUNT;j++){
             S[j]=false;
         } 
@@ -122,9 +122,9 @@ result graphMatrix::caculate(){
         dis[i]=0;
         order[0]=i;
 
-        for(int i=0;i<NODE_COUNT;i++){
-            ninfo[i].flowSum=_nodeTraffic[i];
-            ninfo[i].flowLoss=0;
+        for(int j=0;j<NODE_COUNT;j++){
+            ninfo[j].flowSum=_nodeTraffic[j]/GATE_COUNT;
+            ninfo[j].flowLoss=0;
         }
 
         while(index<NODE_COUNT){
@@ -152,14 +152,22 @@ result graphMatrix::caculate(){
             order[index++]=nearest;
         }
 
-        for(int k=NODE_COUNT-1;k>0;k--){
-            i=order[k];
-            float flowPass=ninfo[i].flowSum*_edgeRel[i][prev[i]];
-            res.avgDelay+=flowPass*_edgeDelay[i][prev[i]]; 
-            ninfo[prev[i]].flowSum=ninfo[i].flowSum*_edgeRel[i][prev[i]];
-            res.flowLoss+=ninfo[i].flowLoss=ninfo[i].flowSum*(1-_edgeRel[i][prev[i]]);
+        for(int j=NODE_COUNT-1;j>0;j--){
+            int k=order[j];
+            float flowPass=ninfo[k].flowSum*_edgeRel[k][prev[k]];
+            //cout<<k<<" to "<<prev[k]<<":"<<flowPass<<endl;
+            if(ninfo[k].controler!=ninfo[prev[k]].controler){
+                flowPass*=ninfo[prev[k]].controlerRel;
+                res.avgDelay+=flowPass*ninfo[prev[k]].controlerDelay*2;
+                //cout<<"switch ctrler, add "<<flowPass<<"*"<<ninfo[prev[k]].controlerDelay*2<<endl;
+            }
+            res.avgDelay+=flowPass*_edgeDelay[k][prev[k]]; 
+            ninfo[prev[k]].flowSum+=ninfo[k].flowSum*_edgeRel[k][prev[k]];
+            ninfo[k].flowLoss=ninfo[k].flowSum-flowPass;
+            res.flowLoss+=ninfo[k].flowLoss;
         }
     }
-    cout<<res.avgDelay<<endl;
+    res.avgDelay/=1-res.flowLoss;
+    cout<<res.avgDelay<<" "<<res.flowLoss<<endl;
     return res;
 }
