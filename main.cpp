@@ -50,7 +50,7 @@ int main(int argc,char **argv){
         cout<<endl;
         graph->importControler(res,ctrlerCount);
         result score=graph->caculate();
-        cout<<"Average flow setup time: "<<score.avgDelay<<endl;
+        cout<<"Average flow setup time: "<<score.avgDelay<<" Flow loss: "<<score.flowLoss<<endl;
 
         delays[s-5]=score.avgDelay;
     }
