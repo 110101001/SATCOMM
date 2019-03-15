@@ -37,13 +37,21 @@ int main(int argc,char **argv){
         cout<<"Caculating "<<argv[s]<<":";
         graph = getMatrix(argv[s]);
         int *res=anneal(initTemp,endTemp,k,ctrlerCount);
-        /*cout<<"Best placement: ";
+
+        cout<<"Best placement: ";
         for(int i=0;i<ctrlerCount;i++){
-            cout<<res[i]<<" ";
+            if((res[i]-GATE_COUNT)%SATELLITE_PER_PLANE<9){
+                cout<<"LEO"<<(res[i]-GATE_COUNT)/SATELLITE_PER_PLANE+1<<"0"<<(res[i]-GATE_COUNT)%SATELLITE_PER_PLANE+1<<" ";
+            }
+            else{
+                cout<<"LEO"<<(res[i]-GATE_COUNT)/SATELLITE_PER_PLANE+1<<(res[i]-GATE_COUNT)%SATELLITE_PER_PLANE+1<<" ";
+            }
         }
-        cout<<endl;*/
+        cout<<endl;
         graph->importControler(res,ctrlerCount);
         result score=graph->caculate();
+        cout<<"Average flow setup time: "<<score.avgDelay<<endl;
+
         delays[s-5]=score.avgDelay;
     }
     for(int i=0;i<argc-5;i++){

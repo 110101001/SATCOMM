@@ -32,7 +32,7 @@ graphMatrix::graphMatrix(float edgeDelay[][NODE_COUNT],float edgeRel[][NODE_COUN
     for(int i=0;i<NODE_COUNT;i++){
         ninfo[i].flowLoss=0;
     }
-     
+
 }
 //First task is to assign a controler to every node(minimum delay), and caculate delay and reliability between controler and node accordingly. Then controlers[] is no longer needed.
 void graphMatrix::importControler(int controlers[],int controlerCount){
@@ -100,12 +100,12 @@ void graphMatrix::importControler(int controlers[],int controlerCount){
         ninfo[i].controlerRel=rel*rel;
     }
     /*for(int i=0;i<NODE_COUNT;i++){
-        cout<<"index:"<<i<<" ctrler:"<<ninfo[i].controler<<" delay:"<<ninfo[i].controlerDelay<<" rel:"<<ninfo[i].controlerRel<<endl;
-    }*/
+      cout<<"index:"<<i<<" ctrler:"<<ninfo[i].controler<<" delay:"<<ninfo[i].controlerDelay<<" rel:"<<ninfo[i].controlerRel<<endl;
+      }*/
 }
 
 //Second task is to caculate results
-result graphMatrix::caculate(){
+/*result graphMatrix::caculate(){
     result res={0,0};
     for(int i=0;i<GATE_COUNT;i++){
         bool S[NODE_COUNT];
@@ -171,6 +171,73 @@ result graphMatrix::caculate(){
             ninfo[prev[k]].flowSum+=ninfo[k].flowSum*_edgeRel[k][prev[k]];
             ninfo[k].flowLoss=ninfo[k].flowSum-flowPass;
             res.flowLoss+=ninfo[k].flowLoss;
+        }
+    }
+    res.avgDelay/=1-res.flowLoss;
+    //cout<<res.avgDelay<<" "<<res.flowLoss<<endl;
+    return res;
+}
+*/
+result graphMatrix::caculate(){
+    result res={0,0};
+    for(int i=0;i<GATE_COUNT;i++){
+        bool S[NODE_COUNT];
+        float dis[NODE_COUNT];
+        int prev[NODE_COUNT];
+        int index=1;
+        for(int j=0;j<NODE_COUNT;j++){
+            S[j]=false;
+        } 
+
+        S[i]=true;
+        dis[i]=0;
+
+        for(int j=0;j<NODE_COUNT;j++){
+            ninfo[j].flowSum=_nodeTraffic[j]/GATE_COUNT;
+            ninfo[j].flowLoss=0;
+        }
+
+        while(index<NODE_COUNT){
+            int nearest=0;
+            int prevNode=0;
+            bool ctrlFlag=false;
+            float minDistance=10;//Should be large enough
+            for(int j=0;j<NODE_COUNT;j++){
+                if(S[j]){
+                    for(int k=0;k<NODE_COUNT;k++){
+                        if(_edgeDelay[j][k]==0||S[k]) continue;
+                        float tmpDis;
+                        tmpDis=dis[j]+_edgeDelay[j][k];
+                        if(tmpDis<minDistance){
+                            nearest=k;
+                            minDistance=tmpDis;
+                            prevNode=j;
+                        }
+                    }
+                }
+            }
+            prev[nearest]=prevNode;
+            S[nearest]=true;
+            dis[nearest]=minDistance; 
+
+            int k=nearest;
+            float totalRel=1;
+            float totalDelay=0;
+            totalRel*=ninfo[k].controlerRel;
+            totalDelay+=ninfo[k].controlerDelay;
+            while(k!=i){
+                totalRel*=_edgeRel[k][prev[k]];
+                if(ninfo[k].controler!=ninfo[prev[k]].controler){
+                    totalRel*=ninfo[prev[k]].controlerRel;
+                    totalDelay+=ninfo[prev[k]].controlerDelay;
+                    //cout<<"switch ctrler, add "<<flowPass<<"*"<<ninfo[prev[k]].controlerDelay*2<<endl;
+                }
+                k=prev[k];    
+            }
+            totalDelay+=minDistance;
+            res.avgDelay+=ninfo[nearest].flowSum*totalRel*totalDelay;
+            res.flowLoss+=ninfo[nearest].flowSum*(1-totalRel);
+            index++;
         }
     }
     res.avgDelay/=1-res.flowLoss;
