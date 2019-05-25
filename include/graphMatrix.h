@@ -44,6 +44,7 @@ class graphMatrix{
         graphMatrix(float edgeDelay[][NODE_COUNT],float edgeRel[][NODE_COUNT],float _nodeTraffic[],int gate[]);
         void importControler(int controlers[],int controlerCount);
         result caculate();
+        float testFailure();
 };
 
 #endif

@@ -15,6 +15,6 @@
 #define _GENERATEMATRIX_H_
 #include"graphMatrix.h"
 
-class graphMatrix *getMatrix(const char *snapName);
+class graphMatrix *getMatrix(const char *snapName,const char* flowName);
 
 #endif

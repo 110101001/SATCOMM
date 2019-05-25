@@ -14,6 +14,7 @@
 #ifndef _SIMULATEANNEAL_H_
 #define _SIMULATEANNEAL_H_
 
+#include"graphMatrix.h"
 #include"../iridiumDefines.h"
 
 void generateNewSet(int *ctrlers,int count);
